@@ -1,7 +1,7 @@
 import keyboard,serial
 import datetime
 print("opening")
-ser = serial.Serial("COM4", 74880, timeout=0.1)
+ser = serial.Serial("COM6", 74880, timeout=0.1)
 print("waiting")
 morse = {
         # Letters

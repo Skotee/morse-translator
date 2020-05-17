@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <style>
+            body{font-family: "Roboto", sans-serif;}
+#main-letter header{
+    font-size: 30vw;
+    color:#16a085;
+    text-align: center;
+}
+#text{
+    font-size: 5vw;
+    color:#2c3e50;
+    text-align: center;
+}
+#received-chars{
+    font-size: 25vw;
+    margin-top:-15vw;
+    height:25vw;
+    text-align: center;
+}
+#container{
+    width:90vw;
+}
+#share{
+    margin-top:10vw;
+}
+        </style>
+        
+    </head>
+<body>
+    <section id="container">
+    <section id="main-letter">
+        <header id="main-letter-element">
+           
+        </header>
+    </section>
+    <section id="received-chars">
+           
+    </section>
+    <section id="text">
+       
+    </section>
+    <section id="share">
+            <img src="icons.png" width="100%">
+    </section>
+</section>
+<script
+			  src="jquery-3.5.1.min.js"></script>
+<script>
+     let objectFlip = (obj)=>{
+  const ret = {};
+  Object.keys(obj).forEach(key => {
+    ret[obj[key]] = key;
+  });
+  return ret;
+}
+    let morse = {
+        "a": ".-",
+        "b": "-...",
+        "c": "-.-.",
+        "d": "-..",
+        "e": ".",
+        "f": "..-.",
+        "g": "--.",
+        "h": "....",
+        "i": "..",
+        "j": ".---",
+        "k": "-.-",
+        "l": ".-..",
+        "m": "--",
+        "n": "-.",
+        "o": "---",
+        "p": ".--.",
+        "q": "--.-",
+        "r": ".-.",
+        "s": "...",
+        "t": "-",
+        "u": "..-",
+        "v": "...-",
+        "w": ".--",
+        "x": "-..-",
+        "y": "-.--",
+        "z": "--..",
+   
+        "0": "-----",
+        "1": ".----",
+        "2": "..---",
+        "3": "...--",
+        "4": "....-",
+        "5": ".....",
+        "6": "-....",
+        "7": "--...",
+        "8": "---..",
+        "9": "----.",
+   
+        "&": ".-...",
+        "'": ".----.",
+        "@": ".--.-.",
+        ")": "-.--.-",
+        "(": "-.--.",
+        ":": "---...",
+        ",": "--..--",
+        "=": "-...-",
+        "!": "-.-.--",
+        ".": ".-.-.-",
+        "-": "-....-",
+        "+": ".-.-.",
+        '"': ".-..-.",
+        "?": "..--..",
+        "/": "-..-.",
+    };
+let reverseMorse = objectFlip(morse);
+let text = "";
+let currentMsg = ""
+let dot_or_line = (length)=>{
+    if (Number(length)>220)
+        return "-"
+    return "."
+}
+let currentChar = undefined;
+let lastMessageTime=undefined;
+let onSocket = (value)=>{
+   
+    if (value.includes(",")){
+        
+        let l = value.split(",")[1]
+        currentMsg+=dot_or_line(l)
+        $("#received-chars").html(currentMsg);
+        if (reverseMorse[currentMsg] != undefined){
+            $("#main-letter-element").html(reverseMorse[currentMsg])
+        }
+        else{
+            $("#main-letter-element").html("")
+        }
+        lastMessageTime = Date.now();
+    }
+}
+let intervalChecker  = ()=>{
+    if (lastMessageTime!=undefined && currentMsg!=""){
+        console.log(currentMsg);
+        now = Date.now();
+        if (Math.abs(now - lastMessageTime) > 800){
+            if (reverseMorse[currentMsg] != undefined){
+              
+                lastMessageTime=now;
+                text+=reverseMorse[currentMsg];
+                console.log(reverseMorse[currentMsg])
+                currentMsg="";
+                $("#received-chars").html(currentMsg);
+                $("#text").html(text);
+            }
+        }
+    }
+}
+$(document).ready(()=>{
+    let webSocket = new WebSocket("ws://192.168.4.1:8080");
+    webSocket.onmessage = function (event) {
+  onSocket(event.data);
+}
+    setInterval(intervalChecker, 100);
+})
+</script>
+</body>
+</html>
